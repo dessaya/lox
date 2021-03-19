@@ -178,6 +178,6 @@ func (p *Parser) synchronize() {
 }
 
 func (p *Parser) error(token *Token, message string) ParseError {
-	TokenError(token, message)
+	ReportTokenError(token, message)
 	return ParseError(errors.New(message))
 }

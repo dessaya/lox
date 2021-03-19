@@ -1,7 +1,7 @@
 package main
 
 type Expr interface {
-	accept(v ExprVisitor)
+	accept(v ExprVisitor) interface{}
 }
 
 type Binary struct {
@@ -18,8 +18,8 @@ func NewBinary(left Expr, operator *Token, right Expr) *Binary {
 	}
 }
 
-func (b *Binary) accept(ev ExprVisitor) {
-	ev.visitBinary(b)
+func (b *Binary) accept(ev ExprVisitor) interface{} {
+	return ev.visitBinary(b)
 }
 
 type Grouping struct {
@@ -32,8 +32,8 @@ func NewGrouping(expression Expr) *Grouping {
 	}
 }
 
-func (g *Grouping) accept(ev ExprVisitor) {
-	ev.visitGrouping(g)
+func (g *Grouping) accept(ev ExprVisitor) interface{} {
+	return ev.visitGrouping(g)
 }
 
 type Literal struct {
@@ -46,8 +46,8 @@ func NewLiteral(value interface{}) *Literal {
 	}
 }
 
-func (l *Literal) accept(ev ExprVisitor) {
-	ev.visitLiteral(l)
+func (l *Literal) accept(ev ExprVisitor) interface{} {
+	return ev.visitLiteral(l)
 }
 
 type Unary struct {
@@ -62,13 +62,13 @@ func NewUnary(operator *Token, right Expr) *Unary {
 	}
 }
 
-func (u *Unary) accept(ev ExprVisitor) {
-	ev.visitUnary(u)
+func (u *Unary) accept(ev ExprVisitor) interface{} {
+	return ev.visitUnary(u)
 }
 
 type ExprVisitor interface {
-	visitBinary(b *Binary)
-	visitGrouping(g *Grouping)
-	visitLiteral(l *Literal)
-	visitUnary(u *Unary)
+	visitBinary(b *Binary) interface{}
+	visitGrouping(g *Grouping) interface{}
+	visitLiteral(l *Literal) interface{}
+	visitUnary(u *Unary) interface{}
 }

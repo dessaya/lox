@@ -3,42 +3,40 @@ package main
 import "fmt"
 
 type astPrinter struct {
-	s string
 }
 
 func ExprToString(e Expr) string {
-	a := &astPrinter{}
-	e.accept(a)
-	return a.s
+	a := astPrinter{}
+	return e.accept(a).(string)
 }
 
-func (a *astPrinter) visitBinary(b *Binary) {
-	a.parenthesize(b.operator.lexeme, b.left, b.right)
+func (a astPrinter) visitBinary(b *Binary) interface{} {
+	return a.parenthesize(b.operator.lexeme, b.left, b.right)
 }
 
-func (a *astPrinter) visitGrouping(g *Grouping) {
-	a.parenthesize("group", g.expression)
+func (a astPrinter) visitGrouping(g *Grouping) interface{} {
+	return a.parenthesize("group", g.expression)
 }
 
-func (a *astPrinter) visitLiteral(l *Literal) {
+func (a astPrinter) visitLiteral(l *Literal) interface{} {
 	if l.value == nil {
-		a.s = "nil"
-		return
+		return "nil"
 	}
-	a.s = fmt.Sprintf("%v", l.value)
+	return fmt.Sprintf("%v", l.value)
 }
 
-func (a *astPrinter) visitUnary(u *Unary) {
-	a.parenthesize(u.operator.lexeme, u.right)
+func (a astPrinter) visitUnary(u *Unary) interface{} {
+	return a.parenthesize(u.operator.lexeme, u.right)
 }
 
-func (a *astPrinter) parenthesize(name string, exprs ...Expr) {
-	a.s = "(" + name
+func (a astPrinter) parenthesize(name string, exprs ...Expr) string {
+	s := "(" + name
 	for _, expr := range exprs {
-		a.s += " "
-		aa := &astPrinter{}
-		expr.accept(aa)
-		a.s += aa.s
+		s += " "
+		aa := astPrinter{}
+		ss := expr.accept(aa).(string)
+		s += ss
 	}
-	a.s += ")"
+	s += ")"
+	return s
 }

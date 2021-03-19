@@ -127,7 +127,7 @@ func (s *Scanner) scanToken() {
 		} else if isAlpha(c) {
 			s.identifier()
 		} else {
-			Error(s.line, "Unexpected character.")
+			ReportError(s.line, "Unexpected character.")
 		}
 	}
 }
@@ -174,7 +174,7 @@ func (s *Scanner) numberToken() {
 	}
 	n, err := strconv.ParseFloat(s.source[s.start:s.current], 64)
 	if err != nil {
-		Error(s.line, err.Error())
+		ReportError(s.line, err.Error())
 	} else {
 		s.addToken(NUMBER, n)
 	}
@@ -189,7 +189,7 @@ func (s *Scanner) stringToken() {
 	}
 
 	if s.isAtEnd() {
-		Error(s.line, "Unterminated string.")
+		ReportError(s.line, "Unterminated string.")
 		return
 	}
 

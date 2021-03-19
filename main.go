@@ -10,6 +10,10 @@ import (
 )
 
 var hadError bool
+var hadRuntimeError bool
+var debug bool
+
+var interpreter = &Interpreter{}
 
 func main() {
 	args := os.Args[1:]
@@ -42,6 +46,9 @@ func runFile(path string) {
 	if hadError {
 		os.Exit(65)
 	}
+	if hadRuntimeError {
+		os.Exit(70)
+	}
 }
 
 func runPrompt() {
@@ -72,19 +79,27 @@ func run(source string) {
 		return
 	}
 
-	fmt.Printf("%s\n", ExprToString(expression))
+	if debug {
+		fmt.Printf("[debug] %s\n", ExprToString(expression))
+	}
+	interpreter.Interpret(expression)
 }
 
-func Error(line int, message string) {
+func ReportError(line int, message string) {
 	report(line, "", message)
 }
 
-func TokenError(token *Token, message string) {
+func ReportTokenError(token *Token, message string) {
 	if token.kind == EOF {
 		report(token.line, " at end", message)
 	} else {
 		report(token.line, " at '"+token.lexeme+"'", message)
 	}
+}
+
+func ReportRuntimeError(err RuntimeError) {
+	fmt.Printf("%s\n[line %d]\n", err.Error(), err.Token.line)
+	hadRuntimeError = true
 }
 
 func report(line int, where string, message string) {
