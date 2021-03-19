@@ -16,9 +16,38 @@ func NewParser(tokens []*Token) *Parser {
 func (p *Parser) Parse() []Stmt {
 	var statements []Stmt
 	for !p.isAtEnd() {
-		statements = append(statements, p.statement())
+		statements = append(statements, p.declaration())
 	}
 	return statements
+}
+
+func (p *Parser) declaration() Stmt {
+	defer func() {
+		if r := recover(); r != nil {
+			if _, ok := r.(RuntimeError); ok {
+				p.synchronize()
+				return
+			}
+			panic(r)
+		}
+	}()
+
+	if p.match(VAR) {
+		return p.varDeclaration()
+	}
+	return p.statement()
+}
+
+func (p *Parser) varDeclaration() Stmt {
+	name := p.consume(IDENTIFIER, "Expect variable name.")
+
+	var initializer Expr
+	if p.match(EQUAL) {
+		initializer = p.expression()
+	}
+
+	p.consume(SEMICOLON, "Expect ';' after variable declaration.")
+	return NewVar(name, initializer)
 }
 
 func (p *Parser) statement() Stmt {
@@ -147,6 +176,8 @@ func (p *Parser) primary() Expr {
 		return NewLiteral(nil)
 	case p.match(NUMBER, STRING):
 		return NewLiteral(p.previous().literal)
+	case (p.match(IDENTIFIER)):
+		return NewVariable(p.previous())
 	case p.match(LEFT_PAREN):
 		expr := p.expression()
 		p.consume(RIGHT_PAREN, "Expect ')' after expression.")

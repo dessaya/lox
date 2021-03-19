@@ -74,9 +74,11 @@ defineAst(outputDir, "Expr", [
     "Grouping : expression Expr",
     "Literal  : value interface{}",
     "Unary    : operator *Token, right Expr",
+    "Variable : name *Token",
 ])
 
 defineAst(outputDir, "Stmt", [
     "Expression : expression Expr",
-    "Print      : expression Expr"
+    "Print      : expression Expr",
+    "Var        : name *Token, initializer Expr",
 ]);

@@ -34,7 +34,24 @@ func (p *Print) accept(sv StmtVisitor) interface{} {
 	return sv.visitPrintStmt(p)
 }
 
+type Var struct {
+	name        *Token
+	initializer Expr
+}
+
+func NewVar(name *Token, initializer Expr) *Var {
+	return &Var{
+		name:        name,
+		initializer: initializer,
+	}
+}
+
+func (v *Var) accept(sv StmtVisitor) interface{} {
+	return sv.visitVarStmt(v)
+}
+
 type StmtVisitor interface {
 	visitExpressionStmt(e *Expression) interface{}
 	visitPrintStmt(p *Print) interface{}
+	visitVarStmt(v *Var) interface{}
 }

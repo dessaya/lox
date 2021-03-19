@@ -15,6 +15,13 @@ func NewRuntimeError(token *Token, msg string) RuntimeError {
 }
 
 type Interpreter struct {
+	environment *Environment
+}
+
+func NewInterpreter() *Interpreter {
+	return &Interpreter{
+		environment: NewEnvironment(),
+	}
 }
 
 func (i *Interpreter) Interpret(statements []Stmt) {
@@ -45,6 +52,15 @@ func (i *Interpreter) visitExpressionStmt(stmt *Expression) interface{} {
 func (i *Interpreter) visitPrintStmt(stmt *Print) interface{} {
 	value := i.evaluate(stmt.expression)
 	fmt.Println(stringify(value))
+	return nil
+}
+
+func (i *Interpreter) visitVarStmt(stmt *Var) interface{} {
+	var value interface{}
+	if stmt.initializer != nil {
+		value = i.evaluate(stmt.initializer)
+	}
+	i.environment.define(stmt.name.lexeme, value)
 	return nil
 }
 
@@ -110,6 +126,10 @@ func (i *Interpreter) visitUnaryExpr(u *Unary) interface{} {
 		return -checkNumber(u.operator, right)
 	}
 	panic("unreachable")
+}
+
+func (i *Interpreter) visitVariableExpr(expr *Variable) interface{} {
+	return i.environment.get(expr.name)
 }
 
 func (i *Interpreter) evaluate(expr Expr) interface{} {

@@ -12,7 +12,7 @@ import (
 var hadError bool
 var hadRuntimeError bool
 
-var interpreter = &Interpreter{}
+var interpreter = NewInterpreter()
 
 func main() {
 	args := os.Args[1:]

@@ -68,9 +68,24 @@ func (u *Unary) accept(ev ExprVisitor) interface{} {
 	return ev.visitUnaryExpr(u)
 }
 
+type Variable struct {
+	name *Token
+}
+
+func NewVariable(name *Token) *Variable {
+	return &Variable{
+		name: name,
+	}
+}
+
+func (v *Variable) accept(ev ExprVisitor) interface{} {
+	return ev.visitVariableExpr(v)
+}
+
 type ExprVisitor interface {
 	visitBinaryExpr(b *Binary) interface{}
 	visitGroupingExpr(g *Grouping) interface{}
 	visitLiteralExpr(l *Literal) interface{}
 	visitUnaryExpr(u *Unary) interface{}
+	visitVariableExpr(v *Variable) interface{}
 }
