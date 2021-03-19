@@ -6,6 +6,20 @@ type Stmt interface {
 	accept(v StmtVisitor) interface{}
 }
 
+type Block struct {
+	statements []Stmt
+}
+
+func NewBlock(statements []Stmt) *Block {
+	return &Block{
+		statements: statements,
+	}
+}
+
+func (b *Block) accept(sv StmtVisitor) interface{} {
+	return sv.visitBlockStmt(b)
+}
+
 type Expression struct {
 	expression Expr
 }
@@ -51,6 +65,7 @@ func (v *Var) accept(sv StmtVisitor) interface{} {
 }
 
 type StmtVisitor interface {
+	visitBlockStmt(b *Block) interface{}
 	visitExpressionStmt(e *Expression) interface{}
 	visitPrintStmt(p *Print) interface{}
 	visitVarStmt(v *Var) interface{}
