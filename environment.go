@@ -18,3 +18,10 @@ func (e *Environment) get(name *Token) interface{} {
 	}
 	panic(NewRuntimeError(name, "Undefined variable '"+name.lexeme+"'."))
 }
+func (e *Environment) assign(name *Token, value interface{}) {
+	if _, ok := e.values[name.lexeme]; ok {
+		e.values[name.lexeme] = value
+		return
+	}
+	panic(NewRuntimeError(name, "Undefined variable '"+name.lexeme+"'."))
+}

@@ -64,6 +64,12 @@ func (i *Interpreter) visitVarStmt(stmt *Var) interface{} {
 	return nil
 }
 
+func (i *Interpreter) visitAssignExpr(expr *Assign) interface{} {
+	value := i.evaluate(expr.value)
+	i.environment.assign(expr.name, value)
+	return value
+}
+
 func (i *Interpreter) visitBinaryExpr(b *Binary) interface{} {
 	left := i.evaluate(b.left)
 	right := i.evaluate(b.right)

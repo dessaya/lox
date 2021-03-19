@@ -6,6 +6,22 @@ type Expr interface {
 	accept(v ExprVisitor) interface{}
 }
 
+type Assign struct {
+	name  *Token
+	value Expr
+}
+
+func NewAssign(name *Token, value Expr) *Assign {
+	return &Assign{
+		name:  name,
+		value: value,
+	}
+}
+
+func (a *Assign) accept(ev ExprVisitor) interface{} {
+	return ev.visitAssignExpr(a)
+}
+
 type Binary struct {
 	left     Expr
 	operator *Token
@@ -83,6 +99,7 @@ func (v *Variable) accept(ev ExprVisitor) interface{} {
 }
 
 type ExprVisitor interface {
+	visitAssignExpr(a *Assign) interface{}
 	visitBinaryExpr(b *Binary) interface{}
 	visitGroupingExpr(g *Grouping) interface{}
 	visitLiteralExpr(l *Literal) interface{}
