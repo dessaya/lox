@@ -17,7 +17,7 @@ func NewRuntimeError(token *Token, msg string) RuntimeError {
 type Interpreter struct {
 }
 
-func (i *Interpreter) Interpret(expression Expr) {
+func (i *Interpreter) Interpret(statements []Stmt) {
 	defer func() {
 		if r := recover(); r != nil {
 			if e, ok := r.(RuntimeError); ok {
@@ -28,11 +28,27 @@ func (i *Interpreter) Interpret(expression Expr) {
 		}
 	}()
 
-	value := i.evaluate(expression)
-	fmt.Println(stringify(value))
+	for _, s := range statements {
+		i.execute(s)
+	}
 }
 
-func (i *Interpreter) visitBinary(b *Binary) interface{} {
+func (i *Interpreter) execute(stmt Stmt) {
+	stmt.accept(i)
+}
+
+func (i *Interpreter) visitExpressionStmt(stmt *Expression) interface{} {
+	i.evaluate(stmt.expression)
+	return nil
+}
+
+func (i *Interpreter) visitPrintStmt(stmt *Print) interface{} {
+	value := i.evaluate(stmt.expression)
+	fmt.Println(stringify(value))
+	return nil
+}
+
+func (i *Interpreter) visitBinaryExpr(b *Binary) interface{} {
 	left := i.evaluate(b.left)
 	right := i.evaluate(b.right)
 	switch b.operator.kind {
@@ -77,15 +93,15 @@ func (i *Interpreter) visitBinary(b *Binary) interface{} {
 	panic("unreachable")
 }
 
-func (i *Interpreter) visitGrouping(g *Grouping) interface{} {
+func (i *Interpreter) visitGroupingExpr(g *Grouping) interface{} {
 	return i.evaluate(g.expression)
 }
 
-func (i *Interpreter) visitLiteral(l *Literal) interface{} {
+func (i *Interpreter) visitLiteralExpr(l *Literal) interface{} {
 	return l.value
 }
 
-func (i *Interpreter) visitUnary(u *Unary) interface{} {
+func (i *Interpreter) visitUnaryExpr(u *Unary) interface{} {
 	right := i.evaluate(u.right)
 	switch u.operator.kind {
 	case BANG:

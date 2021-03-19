@@ -10,22 +10,22 @@ func ExprToString(e Expr) string {
 	return e.accept(a).(string)
 }
 
-func (a astPrinter) visitBinary(b *Binary) interface{} {
+func (a astPrinter) visitBinaryExpr(b *Binary) interface{} {
 	return a.parenthesize(b.operator.lexeme, b.left, b.right)
 }
 
-func (a astPrinter) visitGrouping(g *Grouping) interface{} {
+func (a astPrinter) visitGroupingExpr(g *Grouping) interface{} {
 	return a.parenthesize("group", g.expression)
 }
 
-func (a astPrinter) visitLiteral(l *Literal) interface{} {
+func (a astPrinter) visitLiteralExpr(l *Literal) interface{} {
 	if l.value == nil {
 		return "nil"
 	}
 	return fmt.Sprintf("%v", l.value)
 }
 
-func (a astPrinter) visitUnary(u *Unary) interface{} {
+func (a astPrinter) visitUnaryExpr(u *Unary) interface{} {
 	return a.parenthesize(u.operator.lexeme, u.right)
 }
 

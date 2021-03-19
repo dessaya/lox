@@ -11,7 +11,6 @@ import (
 
 var hadError bool
 var hadRuntimeError bool
-var debug bool
 
 var interpreter = &Interpreter{}
 
@@ -72,17 +71,14 @@ func run(source string) {
 	tokens := scanner.ScanTokens()
 
 	parser := NewParser(tokens)
-	expression := parser.Parse()
+	statements := parser.Parse()
 
 	// Stop if there was a syntax error.
 	if hadError {
 		return
 	}
 
-	if debug {
-		fmt.Printf("[debug] %s\n", ExprToString(expression))
-	}
-	interpreter.Interpret(expression)
+	interpreter.Interpret(statements)
 }
 
 func ReportError(line int, message string) {
