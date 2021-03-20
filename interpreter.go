@@ -147,6 +147,23 @@ func (i *Interpreter) visitBinaryExpr(b *Binary) interface{} {
 	panic("unreachable")
 }
 
+func (i *Interpreter) visitCallExpr(expr *Call) interface{} {
+	callee := i.evaluate(expr.callee)
+
+	var arguments []interface{}
+	for _, argument := range expr.arguments {
+		arguments = append(arguments, i.evaluate(argument))
+	}
+
+	if function, ok := callee.(LoxCallable); ok {
+		if len(arguments) != function.Arity() {
+			panic(NewRuntimeError(expr.paren, fmt.Sprintf("Expected %d arguments but got %d.", function.Arity(), len(arguments))))
+		}
+		return function.Call(i, arguments)
+	}
+	panic(NewRuntimeError(expr.paren, "Can only call functions and classes."))
+}
+
 func (i *Interpreter) visitGroupingExpr(g *Grouping) interface{} {
 	return i.evaluate(g.expression)
 }

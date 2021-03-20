@@ -40,6 +40,24 @@ func (b *Binary) accept(ev ExprVisitor) interface{} {
 	return ev.visitBinaryExpr(b)
 }
 
+type Call struct {
+	callee    Expr
+	paren     *Token
+	arguments []Expr
+}
+
+func NewCall(callee Expr, paren *Token, arguments []Expr) *Call {
+	return &Call{
+		callee:    callee,
+		paren:     paren,
+		arguments: arguments,
+	}
+}
+
+func (c *Call) accept(ev ExprVisitor) interface{} {
+	return ev.visitCallExpr(c)
+}
+
 type Grouping struct {
 	expression Expr
 }
@@ -119,6 +137,7 @@ func (v *Variable) accept(ev ExprVisitor) interface{} {
 type ExprVisitor interface {
 	visitAssignExpr(a *Assign) interface{}
 	visitBinaryExpr(b *Binary) interface{}
+	visitCallExpr(c *Call) interface{}
 	visitGroupingExpr(g *Grouping) interface{}
 	visitLiteralExpr(l *Literal) interface{}
 	visitLogicalExpr(l *Logical) interface{}
