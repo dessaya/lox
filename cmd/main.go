@@ -7,12 +7,11 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/dessaya/lox"
 )
 
-var hadError bool
-var hadRuntimeError bool
-
-var interpreter = NewInterpreter()
+var interpreter = lox.NewInterpreter()
 
 func main() {
 	args := os.Args[1:]
@@ -42,10 +41,10 @@ func loadFile(path string) string {
 
 func runFile(path string) {
 	run(loadFile(path))
-	if hadError {
+	if lox.HadError {
 		os.Exit(65)
 	}
-	if hadRuntimeError {
+	if lox.HadRuntimeError {
 		os.Exit(70)
 	}
 }
@@ -59,7 +58,7 @@ func runPrompt() {
 			log.Fatal(err)
 		}
 		run(line)
-		hadError = false
+		lox.HadError = false
 		if err == io.EOF {
 			break
 		}
@@ -67,38 +66,16 @@ func runPrompt() {
 }
 
 func run(source string) {
-	scanner := NewScanner(source)
+	scanner := lox.NewScanner(source)
 	tokens := scanner.ScanTokens()
 
-	parser := NewParser(tokens)
+	parser := lox.NewParser(tokens)
 	statements := parser.Parse()
 
 	// Stop if there was a syntax error.
-	if hadError {
+	if lox.HadError {
 		return
 	}
 
 	interpreter.Interpret(statements)
-}
-
-func ReportError(line int, message string) {
-	report(line, "", message)
-}
-
-func ReportTokenError(token *Token, message string) {
-	if token.kind == EOF {
-		report(token.line, " at end", message)
-	} else {
-		report(token.line, " at '"+token.lexeme+"'", message)
-	}
-}
-
-func ReportRuntimeError(err RuntimeError) {
-	fmt.Printf("%s\n[line %d]\n", err.Error(), err.Token.line)
-	hadRuntimeError = true
-}
-
-func report(line int, where string, message string) {
-	fmt.Printf("[line %d] Error%s: %s\n", line, where, message)
-	hadError = true
 }

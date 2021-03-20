@@ -1,4 +1,4 @@
-package main
+package lox
 
 import (
 	"errors"
@@ -15,12 +15,16 @@ func NewRuntimeError(token *Token, msg string) RuntimeError {
 }
 
 type Interpreter struct {
+	globals     *Environment
 	environment *Environment
 }
 
 func NewInterpreter() *Interpreter {
+	globals := NewEnvironment(nil)
+	globals.define("clock", Clock{})
 	return &Interpreter{
-		environment: NewEnvironment(nil),
+		globals:     globals,
+		environment: globals,
 	}
 }
 
