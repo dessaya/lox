@@ -148,6 +148,22 @@ func (i *Interpreter) visitLiteralExpr(l *Literal) interface{} {
 	return l.value
 }
 
+func (i *Interpreter) visitLogicalExpr(expr *Logical) interface{} {
+	left := i.evaluate(expr.left)
+
+	if expr.operator.kind == OR {
+		if isTruthy(left) {
+			return left
+		}
+	} else { // AND
+		if !isTruthy(left) {
+			return left
+		}
+	}
+
+	return i.evaluate(expr.right)
+}
+
 func (i *Interpreter) visitUnaryExpr(u *Unary) interface{} {
 	right := i.evaluate(u.right)
 	switch u.operator.kind {
