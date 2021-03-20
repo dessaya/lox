@@ -65,6 +65,15 @@ func (i *Interpreter) visitExpressionStmt(stmt *Expression) interface{} {
 	return nil
 }
 
+func (i *Interpreter) visitIfStmt(stmt *If) interface{} {
+	if isTruthy(i.evaluate(stmt.condition)) {
+		i.execute(stmt.thenBranch)
+	} else if stmt.elseBranch != nil {
+		i.execute(stmt.elseBranch)
+	}
+	return nil
+}
+
 func (i *Interpreter) visitPrintStmt(stmt *Print) interface{} {
 	value := i.evaluate(stmt.expression)
 	fmt.Println(stringify(value))
