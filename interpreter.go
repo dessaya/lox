@@ -89,6 +89,13 @@ func (i *Interpreter) visitVarStmt(stmt *Var) interface{} {
 	return nil
 }
 
+func (i *Interpreter) visitWhileStmt(stmt *While) interface{} {
+	for isTruthy(i.evaluate(stmt.condition)) {
+		i.execute(stmt.body)
+	}
+	return nil
+}
+
 func (i *Interpreter) visitAssignExpr(expr *Assign) interface{} {
 	value := i.evaluate(expr.value)
 	i.environment.assign(expr.name, value)

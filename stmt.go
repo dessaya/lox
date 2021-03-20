@@ -82,10 +82,27 @@ func (v *Var) accept(sv StmtVisitor) interface{} {
 	return sv.visitVarStmt(v)
 }
 
+type While struct {
+	condition Expr
+	body      Stmt
+}
+
+func NewWhile(condition Expr, body Stmt) *While {
+	return &While{
+		condition: condition,
+		body:      body,
+	}
+}
+
+func (w *While) accept(sv StmtVisitor) interface{} {
+	return sv.visitWhileStmt(w)
+}
+
 type StmtVisitor interface {
 	visitBlockStmt(b *Block) interface{}
 	visitExpressionStmt(e *Expression) interface{}
 	visitIfStmt(i *If) interface{}
 	visitPrintStmt(p *Print) interface{}
 	visitVarStmt(v *Var) interface{}
+	visitWhileStmt(w *While) interface{}
 }

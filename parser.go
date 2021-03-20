@@ -50,12 +50,23 @@ func (p *Parser) varDeclaration() Stmt {
 	return NewVar(name, initializer)
 }
 
+func (p *Parser) whileStatement() Stmt {
+	p.consume(LEFT_PAREN, "Expect '(' after 'while'.")
+	condition := p.expression()
+	p.consume(RIGHT_PAREN, "Expect ')' after condition.")
+	body := p.statement()
+	return NewWhile(condition, body)
+}
+
 func (p *Parser) statement() Stmt {
 	if p.match(IF) {
 		return p.ifStatement()
 	}
 	if p.match(PRINT) {
 		return p.printStatement()
+	}
+	if p.match(WHILE) {
+		return p.whileStatement()
 	}
 	if p.match(LEFT_BRACE) {
 		return NewBlock(p.block())
