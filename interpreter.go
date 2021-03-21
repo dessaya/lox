@@ -86,8 +86,16 @@ func (i *Interpreter) visitIfStmt(stmt *If) interface{} {
 
 func (i *Interpreter) visitPrintStmt(stmt *Print) interface{} {
 	value := i.evaluate(stmt.expression)
-	fmt.Println(stringify(value))
+	fmt.Printf("%s\n", stringify(value))
 	return nil
+}
+
+func (i *Interpreter) visitReturnStmt(stmt *Return) interface{} {
+	var value interface{}
+	if stmt.value != nil {
+		value = i.evaluate(stmt.value)
+	}
+	panic(returnSignal{value})
 }
 
 func (i *Interpreter) visitVarStmt(stmt *Var) interface{} {

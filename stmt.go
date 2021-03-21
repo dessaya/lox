@@ -84,6 +84,22 @@ func (p *Print) accept(sv StmtVisitor) interface{} {
 	return sv.visitPrintStmt(p)
 }
 
+type Return struct {
+	keyword *Token
+	value   Expr
+}
+
+func NewReturn(keyword *Token, value Expr) *Return {
+	return &Return{
+		keyword: keyword,
+		value:   value,
+	}
+}
+
+func (r *Return) accept(sv StmtVisitor) interface{} {
+	return sv.visitReturnStmt(r)
+}
+
 type Var struct {
 	name        *Token
 	initializer Expr
@@ -122,6 +138,7 @@ type StmtVisitor interface {
 	visitFunctionStmt(f *Function) interface{}
 	visitIfStmt(i *If) interface{}
 	visitPrintStmt(p *Print) interface{}
+	visitReturnStmt(r *Return) interface{}
 	visitVarStmt(v *Var) interface{}
 	visitWhileStmt(w *While) interface{}
 }
