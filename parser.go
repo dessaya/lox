@@ -24,7 +24,7 @@ func (p *Parser) Parse() []Stmt {
 func (p *Parser) declaration() Stmt {
 	defer func() {
 		if r := recover(); r != nil {
-			if _, ok := r.(RuntimeError); ok {
+			if _, ok := r.(ParseError); ok {
 				p.synchronize()
 				return
 			}
@@ -32,6 +32,9 @@ func (p *Parser) declaration() Stmt {
 		}
 	}()
 
+	if p.match(FUN) {
+		return p.function("function")
+	}
 	if p.match(VAR) {
 		return p.varDeclaration()
 	}
@@ -151,6 +154,30 @@ func (p *Parser) expressionStatement() Stmt {
 	expr := p.expression()
 	p.consume(SEMICOLON, "Expect ';' after expression.")
 	return NewExpression(expr)
+}
+
+func (p *Parser) function(kind string) *Function {
+	name := p.consume(IDENTIFIER, "Expect "+kind+" name.")
+	p.consume(LEFT_PAREN, "Expect '(' after "+kind+" name.")
+	var parameters []*Token
+	if !p.check(RIGHT_PAREN) {
+		for {
+			if len(parameters) >= 255 {
+				ReportTokenError(p.peek(), "Can't have more than 255 parameters.")
+			}
+
+			parameters = append(parameters, p.consume(IDENTIFIER, "Expect parameter name."))
+			if !p.match(COMMA) {
+				break
+			}
+		}
+	}
+	p.consume(RIGHT_PAREN, "Expect ')' after parameters.")
+
+	p.consume(LEFT_BRACE, "Expect '{' before "+kind+" body.")
+	body := p.block()
+
+	return NewFunction(name, parameters, body)
 }
 
 func (p *Parser) expression() Expr {
@@ -312,7 +339,7 @@ func (p *Parser) finishCall(callee Expr) Expr {
 				ReportTokenError(p.peek(), "Can't have more than 255 arguments.")
 			}
 			arguments = append(arguments, p.expression())
-			if p.match(COMMA) {
+			if !p.match(COMMA) {
 				break
 			}
 		}

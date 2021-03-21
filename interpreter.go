@@ -69,6 +69,12 @@ func (i *Interpreter) visitExpressionStmt(stmt *Expression) interface{} {
 	return nil
 }
 
+func (i *Interpreter) visitFunctionStmt(stmt *Function) interface{} {
+	function := NewLoxFunction(stmt)
+	i.environment.define(stmt.name.lexeme, function)
+	return nil
+}
+
 func (i *Interpreter) visitIfStmt(stmt *If) interface{} {
 	if isTruthy(i.evaluate(stmt.condition)) {
 		i.execute(stmt.thenBranch)

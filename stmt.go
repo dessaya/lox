@@ -34,6 +34,24 @@ func (e *Expression) accept(sv StmtVisitor) interface{} {
 	return sv.visitExpressionStmt(e)
 }
 
+type Function struct {
+	name   *Token
+	params []*Token
+	body   []Stmt
+}
+
+func NewFunction(name *Token, params []*Token, body []Stmt) *Function {
+	return &Function{
+		name:   name,
+		params: params,
+		body:   body,
+	}
+}
+
+func (f *Function) accept(sv StmtVisitor) interface{} {
+	return sv.visitFunctionStmt(f)
+}
+
 type If struct {
 	condition  Expr
 	thenBranch Stmt
@@ -101,6 +119,7 @@ func (w *While) accept(sv StmtVisitor) interface{} {
 type StmtVisitor interface {
 	visitBlockStmt(b *Block) interface{}
 	visitExpressionStmt(e *Expression) interface{}
+	visitFunctionStmt(f *Function) interface{}
 	visitIfStmt(i *If) interface{}
 	visitPrintStmt(p *Print) interface{}
 	visitVarStmt(v *Var) interface{}
