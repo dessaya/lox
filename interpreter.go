@@ -70,7 +70,7 @@ func (i *Interpreter) visitExpressionStmt(stmt *Expression) interface{} {
 }
 
 func (i *Interpreter) visitFunctionStmt(stmt *Function) interface{} {
-	function := NewLoxFunction(stmt)
+	function := NewLoxFunction(stmt, i.environment)
 	i.environment.define(stmt.name.lexeme, function)
 	return nil
 }
