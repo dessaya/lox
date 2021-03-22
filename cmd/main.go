@@ -77,5 +77,13 @@ func run(source string) {
 		return
 	}
 
+	resolver := lox.NewResolver(interpreter)
+	resolver.Resolve(statements)
+
+	// Stop if there was a resolution error.
+	if lox.HadError {
+		return
+	}
+
 	interpreter.Interpret(statements)
 }

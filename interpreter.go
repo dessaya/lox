@@ -17,6 +17,7 @@ func NewRuntimeError(token *Token, msg string) RuntimeError {
 type Interpreter struct {
 	globals     *Environment
 	environment *Environment
+	locals      map[Expr]int
 }
 
 func NewInterpreter() *Interpreter {
@@ -25,6 +26,7 @@ func NewInterpreter() *Interpreter {
 	return &Interpreter{
 		globals:     globals,
 		environment: globals,
+		locals:      make(map[Expr]int),
 	}
 }
 
@@ -46,6 +48,10 @@ func (i *Interpreter) Interpret(statements []Stmt) {
 
 func (i *Interpreter) execute(stmt Stmt) {
 	stmt.accept(i)
+}
+
+func (i *Interpreter) resolve(expr Expr, depth int) {
+	i.locals[expr] = depth
 }
 
 func (i *Interpreter) executeBlock(statements []Stmt, environment *Environment) {
@@ -116,7 +122,13 @@ func (i *Interpreter) visitWhileStmt(stmt *While) interface{} {
 
 func (i *Interpreter) visitAssignExpr(expr *Assign) interface{} {
 	value := i.evaluate(expr.value)
-	i.environment.assign(expr.name, value)
+
+	if distance, ok := i.locals[expr]; ok {
+		i.environment.assignAt(distance, expr.name, value)
+	} else {
+		i.globals.assign(expr.name, value)
+	}
+
 	return value
 }
 
@@ -218,7 +230,14 @@ func (i *Interpreter) visitUnaryExpr(u *Unary) interface{} {
 }
 
 func (i *Interpreter) visitVariableExpr(expr *Variable) interface{} {
-	return i.environment.get(expr.name)
+	return i.lookUpVariable(expr.name, expr)
+}
+
+func (i *Interpreter) lookUpVariable(name *Token, expr Expr) interface{} {
+	if distance, ok := i.locals[expr]; ok {
+		return i.environment.getAt(distance, name.lexeme)
+	}
+	return i.globals.get(name)
 }
 
 func (i *Interpreter) evaluate(expr Expr) interface{} {
@@ -268,7 +287,7 @@ func stringify(object interface{}) string {
 		return "nil"
 	}
 	if s, ok := object.(string); ok {
-		return fmt.Sprintf("%q", s)
+		return s
 	}
 	return fmt.Sprintf("%v", object)
 }
